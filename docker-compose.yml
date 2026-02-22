@@ -24,11 +24,11 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: [ "${NVIDIA_DEVICE_IDS:-1}" ]  # default: GPU 1 only
               capabilities: [ gpu ]
         limits:
-          memory: 16G
-          cpus: '8'
+          memory: ${MEMORY_LIMIT:-16G}
+          cpus: '${CPU_LIMIT:-8}'          
 
     # =========================================================================
     # Environment Variables
@@ -39,11 +39,11 @@ services:
       - DISPLAY_HEIGHT=${DISPLAY_HEIGHT:-1080}
       - DISPLAY_DEPTH=24
 
-      # VNC password - CHANGE THIS!
-      - VNC_PASSWORD=${VNC_PASSWORD:-antigravity}
+      # VNC password
+      - VNC_PASSWORD=${VNC_PASSWORD}
 
       # Timezone
-      - TZ=${TZ:-America/Denver}
+      - TZ=${TZ:-Europe/Athens}
 
       # Auto-update Antigravity
       - ANTIGRAVITY_AUTO_UPDATE=true
@@ -81,8 +81,9 @@ services:
 
       # Persistent Antigravity-specific data
       - ./data/antigravity:/home/antigravity/.antigravity
+      
       # Share clipboard with host (Linux only)
-      # - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
 
       # =========================================================================
       # Runtime Configuration

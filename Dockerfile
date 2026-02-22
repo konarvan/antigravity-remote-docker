@@ -3,7 +3,7 @@
 # A GPU-accelerated container for running Google Antigravity remotely via noVNC
 # =============================================================================
 
-FROM nvidia/cuda:12.3.1-runtime-ubuntu22.04
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
 
 LABEL maintainer="raphl"
 LABEL description="Google Antigravity with noVNC remote access and GPU support"
@@ -78,6 +78,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     htop \
     procps \
+    tmux \
     net-tools \
     # Window management (for auto-maximize)
     wmctrl \
@@ -168,7 +169,7 @@ COPY config/xfce4-panel.xml /opt/defaults/xfce4-panel.xml
 # =============================================================================
 # Volumes
 # =============================================================================
-VOLUME ["/home/${USER}/workspace", "/home/${USER}/.config"]
+VOLUME ["/home/${USER}/antigravity/workspace", "/home/${USER}/.config"]
 
 # =============================================================================
 # Health Check
