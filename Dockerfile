@@ -128,10 +128,14 @@ RUN mkdir -p /etc/apt/keyrings \
 
 # =============================================================================
 # Create Non-Root User
+# Ubuntu 24.04 ships a default 'ubuntu' user at UID/GID 1000 — remove it first
 # =============================================================================
-RUN groupadd -g ${GID} ${USER} \
+RUN userdel -r ubuntu 2>/dev/null || true \
+    && groupdel ubuntu 2>/dev/null || true \
+    && groupadd -g ${GID} ${USER} \
     && useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USER} \
-    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USER} \
+    && echo "${USER} ALL=(root) NOPASSWD: /opt/scripts/privileged-setup.sh" \
+        >> /etc/sudoers.d/${USER} \
     && chmod 0440 /etc/sudoers.d/${USER}
 
 # =============================================================================
