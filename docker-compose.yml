@@ -21,7 +21,7 @@ services:
       POST: 1         # restart, stop, etc.
       INFO: 1         # docker info
       IMAGES: 1       # list images
-      BUILD: 0        # block image builds (enable if agents need it)
+      BUILD: 1        # block image builds (enable if agents need it)
       SWARM: 0
       NETWORKS: 1     # inspect networks
       VOLUMES: 1      # inspect volumes
