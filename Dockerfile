@@ -67,6 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Clipboard support
     xclip \
     xsel \
+    autocutsel \
     # Process management
     supervisor \
     # Auto-updates

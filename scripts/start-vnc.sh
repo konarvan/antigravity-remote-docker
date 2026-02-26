@@ -32,5 +32,9 @@ exec vncserver :${DISPLAY_NUM} \
     -localhost no \
     -SecurityTypes VncAuth \
     -rfbport ${VNC_PORT:-5901} \
+    -SendPrimary=1 \
+    -AcceptCutText=1 \
+    -SendCutText=1 \
     -fg \
     -xstartup ~/.vnc/xstartup
+    
