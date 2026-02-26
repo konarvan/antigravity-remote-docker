@@ -9,6 +9,31 @@
 # =============================================================================
 
 services:
+  # ---------------------------------------------------------------------------
+  # Docker Socket Proxy - safe Docker API access for AI agents
+  # ---------------------------------------------------------------------------
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: antigravity-docker-proxy
+    environment:
+      CONTAINERS: 1   # list/inspect containers
+      EXEC: 1         # docker exec into containers
+      POST: 1         # restart, stop, etc.
+      INFO: 1         # docker info
+      IMAGES: 1       # list images
+      BUILD: 0        # block image builds (enable if agents need it)
+      SWARM: 0
+      NETWORKS: 1     # inspect networks
+      VOLUMES: 1      # inspect volumes
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - asr-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Main Antigravity Container
+  # ---------------------------------------------------------------------------
   antigravity:
     build:
       context: .
@@ -16,9 +41,6 @@ services:
     image: antigravity-remote:latest
     container_name: antigravity-remote
 
-    # =========================================================================
-    # GPU Configuration
-    # =========================================================================
     deploy:
       resources:
         reservations:
@@ -30,83 +52,48 @@ services:
           memory: 16G
           cpus: '8'
 
-    # =========================================================================
-    # Environment Variables
-    # =========================================================================
     environment:
-      # Display settings - resolution auto-adjusts to browser window
       - DISPLAY_WIDTH=${DISPLAY_WIDTH:-1920}
       - DISPLAY_HEIGHT=${DISPLAY_HEIGHT:-1080}
       - DISPLAY_DEPTH=24
-
-      # VNC password - CHANGE THIS!
       - VNC_PASSWORD=${VNC_PASSWORD:-antigravity}
-
-      # Timezone
       - TZ=${TZ:-America/Denver}
-
-      # Auto-update Antigravity
       - ANTIGRAVITY_AUTO_UPDATE=true
-
-      # Auto-launch Antigravity fullscreen on connect
       - AUTOSTART_ANTIGRAVITY=${AUTOSTART_ANTIGRAVITY:-true}
-
-      # NVIDIA runtime
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-
-      # Idle optimization settings
       - IDLE_CHECK_INTERVAL=${IDLE_CHECK_INTERVAL:-30}
       - IDLE_TIMEOUT=${IDLE_TIMEOUT:-60}
       - IDLE_PAUSE_ANTIGRAVITY=${IDLE_PAUSE_ANTIGRAVITY:-false}
+      # Point Docker CLI inside the container to the proxy, not the raw socket
+      - DOCKER_HOST=tcp://docker-proxy:2375
 
-    # =========================================================================
-    # Port Mappings
-    # =========================================================================
     ports:
-      # noVNC web interface
       - "6080:6080"
-      # Direct VNC access (optional, for native VNC clients)
       - "5901:5901"
 
-    # =========================================================================
-    # Volume Mounts
-    # =========================================================================
     volumes:
-      # Persistent workspace for your Antigravity projects
       - ./data/workspace:/home/antigravity/workspace
-
-      # Persistent configuration
       - ./data/config:/home/antigravity/.config
-
-      # Persistent Antigravity-specific data
       - ./data/antigravity:/home/antigravity/.antigravity
-      # Share clipboard with host (Linux only)
-      # - /tmp/.X11-unix:/tmp/.X11-unix:ro
 
-      # =========================================================================
-      # Runtime Configuration
-      # =========================================================================
-      # Use NVIDIA runtime
     runtime: nvidia
 
-    # Security - keep container isolated but functional
     security_opt:
       - seccomp:unconfined
 
-    # Capabilities for connection manager (iptables)
     cap_add:
       - NET_ADMIN
 
-    # Shared memory for better performance
     shm_size: '2gb'
-
-    # Always restart unless stopped manually
     restart: unless-stopped
 
-    # =========================================================================
-    # Health Check
-    # =========================================================================
+    networks:
+      - asr-network
+
+    depends_on:
+      - docker-proxy
+
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:6080/" ]
       interval: 30s
@@ -115,8 +102,11 @@ services:
       start_period: 30s
 
 # =============================================================================
-# Networks (optional, for future expansion)
+# Networks — TOP LEVEL, not under any service
 # =============================================================================
 networks:
-  default:
-    name: antigravity-network
+  asr-network:
+    external: true
+    name: docker_asr-network
+
+    
