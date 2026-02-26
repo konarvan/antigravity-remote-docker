@@ -43,7 +43,8 @@ export XDG_RUNTIME_DIR="/tmp/runtime-$USER"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
 
-# Start clipboard sync daemons (must be after X11 is ready)
+# Clipboard sync — after X11 is ready, with correct auth
+export XAUTHORITY="$HOME/.Xauthority"
 autocutsel -fork -selection CLIPBOARD &
 autocutsel -fork -selection PRIMARY &
 
