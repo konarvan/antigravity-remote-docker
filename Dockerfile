@@ -106,16 +106,46 @@ ENV LANG=en_US.UTF-8 \
 # Install noVNC and websockify
 # =============================================================================
 RUN mkdir -p /opt/novnc \
-    # OLD 
-    #&& curl -fsSL https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz | tar -xz -C /opt/novnc --strip-components=1 \
-    # NEW - fixed clipboard handling
     && curl -fsSL https://github.com/novnc/noVNC/archive/refs/tags/v1.5.0.tar.gz | tar -xz -C /opt/novnc --strip-components=1 \
     && mkdir -p /opt/websockify \
-    # OLD
-    #&& curl -fsSL https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz | tar -xz -C /opt/websockify --strip-components=1 \
-    # NEW    
-    && curl -fsSL https://github.com/novnc/websockify/archive/refs/tags/v0.12.0.tar.gz | tar -xz -C /opt/websockify --strip-components=1 \ 
+    && curl -fsSL https://github.com/novnc/websockify/archive/refs/tags/v0.12.0.tar.gz | tar -xz -C /opt/websockify --strip-components=1 \
     && ln -sf /opt/websockify /opt/novnc/utils/websockify
+
+# =============================================================================
+# Patch noVNC clipboard - cache clipboard when focused, use cache when not
+# Fixes: "NotAllowedError: Document is not focused" on Ctrl+V
+# =============================================================================
+RUN cat > /opt/novnc/clipboard-patch.js << 'EOF'
+(function() {
+    let cachedText = '';
+
+    // Update cache on every user interaction that implies focus
+    const updateCache = () => {
+        navigator.clipboard.readText()
+            .then(t => { cachedText = t; })
+            .catch(() => {});
+    };
+
+    window.addEventListener('focus', updateCache);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) updateCache();
+    });
+    // Cache on click — most reliable trigger (user gesture)
+    document.addEventListener('mousedown', updateCache, true);
+
+    // Override readText: use live API when focused, fall back to cache when not
+    const _original = navigator.clipboard.readText.bind(navigator.clipboard);
+    navigator.clipboard.readText = function() {
+        if (document.hasFocus()) {
+            return _original().then(t => { cachedText = t; return t; });
+        }
+        return Promise.resolve(cachedText);
+    };
+})();
+EOF
+
+# Inject patch script into vnc.html before </head>
+RUN sed -i 's|</head>|<script src="clipboard-patch.js"></script></head>|' /opt/novnc/vnc.html
 
 # Create custom index.html that forces English language and auto-connects
 RUN echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=vnc.html?autoconnect=true&resize=remote&lang=en"></head><body>Redirecting...</body></html>' > /opt/novnc/index.html
