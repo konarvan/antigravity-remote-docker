@@ -45,6 +45,10 @@ chmod 700 "$XDG_RUNTIME_DIR"
 
 # Clipboard sync — after X11 is ready, with correct auth
 export XAUTHORITY="$HOME/.Xauthority"
+
+# Bridge VNC protocol clipboard <-> X11 (MUST come before autocutsel)
+vncconfig -iconic &
+
 autocutsel -fork -selection CLIPBOARD &
 autocutsel -fork -selection PRIMARY &
 
