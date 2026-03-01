@@ -76,6 +76,8 @@ services:
       - ./data/workspace:/home/antigravity/workspace
       - ./data/config:/home/antigravity/.config
       - ./data/antigravity:/home/antigravity/.antigravity
+      - ./data/gemini:/home/antigravity/.gemini
+      - ./data/local:/home/antigravity/.local
 
     runtime: nvidia
 
