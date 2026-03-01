@@ -106,9 +106,15 @@ ENV LANG=en_US.UTF-8 \
 # Install noVNC and websockify
 # =============================================================================
 RUN mkdir -p /opt/novnc \
-    && curl -fsSL https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz | tar -xz -C /opt/novnc --strip-components=1 \
+    # OLD 
+    #&& curl -fsSL https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz | tar -xz -C /opt/novnc --strip-components=1 \
+    # NEW - fixed clipboard handling
+    curl -fsSL https://github.com/novnc/noVNC/archive/refs/tags/v1.5.0.tar.gz | tar -xz -C /opt/novnc --strip-components=1 \
     && mkdir -p /opt/websockify \
-    && curl -fsSL https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz | tar -xz -C /opt/websockify --strip-components=1 \
+    # OLD
+    #&& curl -fsSL https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz | tar -xz -C /opt/websockify --strip-components=1 \
+    # NEW    
+    && curl -fsSL https://github.com/novnc/websockify/archive/refs/tags/v0.12.0.tar.gz | tar -xz -C /opt/websockify --strip-components=1 \ 
     && ln -sf /opt/websockify /opt/novnc/utils/websockify
 
 # Create custom index.html that forces English language and auto-connects
