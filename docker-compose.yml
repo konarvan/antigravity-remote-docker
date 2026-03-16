@@ -58,7 +58,7 @@ services:
       - DISPLAY_DEPTH=24
       - VNC_PASSWORD=${VNC_PASSWORD:-antigravity}
       - TZ=${TZ:-America/Denver}
-      - ANTIGRAVITY_AUTO_UPDATE=true
+      - ANTIGRAVITY_AUTO_UPDATE=false
       - AUTOSTART_ANTIGRAVITY=${AUTOSTART_ANTIGRAVITY:-true}
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
