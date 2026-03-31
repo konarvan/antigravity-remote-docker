@@ -58,8 +58,6 @@ exec startxfce4
 EOF
 chmod +x ~/.vnc/xstartup
 
-chmod +x ~/.vnc/xstartup
-
 # =============================================================================
 # Initialize Configuration
 # =============================================================================
@@ -87,6 +85,24 @@ mkdir -p ~/workspace ~/.config ~/.antigravity
 # =============================================================================
 echo "Fixing permissions..."
 sudo chown -R $(id -u):$(id -g) ~ 2>/dev/null || true
+
+# =============================================================================
+# Backup state.vscdb BEFORE update can wipe the chat index
+# =============================================================================
+VSCDB="$HOME/.config/antigravity/User/globalStorage/state.vscdb"
+BACKUP_DIR="$HOME/.config/antigravity/User/globalStorage/backups"
+
+if [ -f "$VSCDB" ]; then
+    mkdir -p "$BACKUP_DIR"
+    BACKUP_FILE="$BACKUP_DIR/state.vscdb.bak.$(date +%Y%m%d_%H%M%S)"
+    cp "$VSCDB" "$BACKUP_FILE" && \
+        echo "[entrypoint] ✅ state.vscdb backed up → $BACKUP_FILE" || \
+        echo "[entrypoint] ⚠️  state.vscdb backup failed"
+    # Keep only the 10 most recent backups
+    ls -t "$BACKUP_DIR"/state.vscdb.bak.* 2>/dev/null | tail -n +11 | xargs rm -f 2>/dev/null || true
+else
+    echo "[entrypoint] ℹ️  No state.vscdb found yet — first run or clean slate"
+fi
 
 # =============================================================================
 # Check for Antigravity updates (if enabled)

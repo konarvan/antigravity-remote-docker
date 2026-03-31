@@ -205,7 +205,7 @@ COPY config/xfce4-panel.xml /opt/defaults/xfce4-panel.xml
 # =============================================================================
 # Volumes
 # =============================================================================
-VOLUME ["/home/${USER}/workspace", "/home/${USER}/.config"]
+#VOLUME ["/home/${USER}/workspace", "/home/${USER}/.config"]
 
 # =============================================================================
 # Health Check
