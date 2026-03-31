@@ -89,8 +89,8 @@ sudo chown -R $(id -u):$(id -g) ~ 2>/dev/null || true
 # =============================================================================
 # Backup state.vscdb BEFORE update can wipe the chat index
 # =============================================================================
-VSCDB="$HOME/.config/antigravity/User/globalStorage/state.vscdb"
-BACKUP_DIR="$HOME/.config/antigravity/User/globalStorage/backups"
+VSCDB="$HOME/.config/Antigravity/User/globalStorage/state.vscdb"
+BACKUP_DIR="$HOME/.config/Antigravity/User/globalStorage/backups"
 
 if [ -f "$VSCDB" ]; then
     mkdir -p "$BACKUP_DIR"
